@@ -1,0 +1,251 @@
+{
+  "schema_version": 1,
+  "measured_on": "2026-08-06",
+  "_readme": "The registry of what is monitored. Agents read this; they never hardcode URLs. Every byte count and status here was MEASURED on 2026-08-06, not assumed. The contract this feeds is portal-hub/page-monitor/CONTRACT.md.",
+  "_provenance": "Copied from production-portal/portal-hub/page-monitor/targets.json (private repo) on 2026-08-06 so the public monitoring repo is self-contained. THIS copy is the one the hourly robot reads. The portal-hub copy is what the dashboard reads for labels and blurbs. If you change a URL, change it in BOTH or the board will describe a page the robot isn't checking. Business/commercial commentary was stripped when this copy was made: this repo is public, and operational context about who was emailed what belongs in the private portal-hub copy, not here.",
+  "targets": [
+    {
+      "id": "stations",
+      "label": "Stations",
+      "aka": [
+        "subchannel campaign",
+        "subchannel",
+        "station partners",
+        "carriage page"
+      ],
+      "blurb": "The station-partner page. Outward-facing and already circulated, so a regression here is seen by the audience it exists to convert.",
+      "order": 1,
+      "wordpress": {
+        "url": "https://genesissciencenetwork.com/stations/",
+        "expected_status": 200,
+        "min_bytes": 50000,
+        "measured_bytes": 72158,
+        "proof_string": "gsn-stations.vercel.app",
+        "expected_iframe_src": "https://gsn-stations.vercel.app"
+      },
+      "vercel": {
+        "url": "https://gsn-stations.vercel.app",
+        "expected_status": 200,
+        "min_bytes": 150000,
+        "measured_bytes": 249242,
+        "proof_string": "Put Genesis Science Network on your station."
+      },
+      "browser": {
+        "check_embed": true,
+        "min_iframe_height": 400,
+        "min_frame_links": 3,
+        "frame_proof_string": "Put Genesis Science Network on your station.",
+        "max_broken_images": 0
+      },
+      "watch_out": "A SECOND Vercel project exists - gsn-stations-redesign - which is a SANDBOX. The live WordPress page points at gsn-stations, NOT the redesign. Every report records which build is actually live so a stale sandbox is never mistaken for production. LIVE BUG 2026-08-07: images render standalone but NOT inside the embed (stations 19/25, internship 11/13). Cause: loading=\"lazy\" in a fixed-height cross-origin iframe that never scrolls, so the images never enter the frame viewport and are never requested. Budget stays 0 - this target is EXPECTED RED until the fix ships."
+    },
+    {
+      "id": "episode-metadata",
+      "label": "Episode Metadata",
+      "aka": [
+        "metadata portal",
+        "partner metadata",
+        "849 episodes"
+      ],
+      "blurb": "The partner-facing episode metadata portal - where distribution partners read episode titles, descriptions and tags.",
+      "order": 2,
+      "wordpress": {
+        "url": "https://genesissciencenetwork.com/episode-metadata/",
+        "expected_status": 200,
+        "min_bytes": 50000,
+        "measured_bytes": 71966,
+        "proof_string": "gsn-episode-metadata.vercel.app",
+        "expected_iframe_src": "https://gsn-episode-metadata.vercel.app"
+      },
+      "vercel": {
+        "url": "https://gsn-episode-metadata.vercel.app",
+        "expected_status": 200,
+        "min_bytes": 800000,
+        "measured_bytes": 1721603,
+        "proof_string": "GSN Episode Metadata Portal"
+      },
+      "browser": {
+        "check_embed": true,
+        "min_iframe_height": 400,
+        "min_frame_links": 50,
+        "frame_proof_string": "Episode Metadata",
+        "max_broken_images": 70
+      },
+      "watch_out": "This wrapper is the flaky one: on 2026-08-06 it twice rendered a WordPress error while its Vercel build served 200 throughout, and refetched clean both times. That is why one bad sample is Degraded, not Broken. NOTE: that fault fires only on a LOGGED-IN render. This robot is always anonymous, so it cannot see it. See README, \"What this cannot see\". IMAGE BUDGET: 60 of 120 YouTube thumbnails do not render - but the count is IDENTICAL standalone and embedded (measured 2026-08-07), so it is a property of the build, NOT the embed bug that hit stations and internship. Budget set to 70 so it does not mask a real regression; the 60 are tracked as their own item."
+    },
+    {
+      "id": "internship",
+      "label": "Motion Graphics Internship",
+      "aka": [
+        "internship",
+        "motiongraphics",
+        "intern landing"
+      ],
+      "blurb": "The internship recruiting landing page.",
+      "order": 3,
+      "canonical_note": "Daniel confirmed 2026-08-06: /motiongraphics-internship/ is CANONICAL. The short /motiongraphics/internship URL is a live orphan, still checked below as an extra URL, still flagged for collapsing.",
+      "wordpress": {
+        "url": "https://genesissciencenetwork.com/motiongraphics-internship/",
+        "expected_status": 200,
+        "min_bytes": 50000,
+        "measured_bytes": 74206,
+        "proof_string": "gsn-internship.vercel.app/landing/",
+        "expected_iframe_src": "https://gsn-internship.vercel.app/landing/"
+      },
+      "vercel": {
+        "url": "https://gsn-internship.vercel.app/landing/",
+        "expected_status": 200,
+        "min_bytes": 60000,
+        "measured_bytes": 101636,
+        "proof_string": "Motion Graphics Internship"
+      },
+      "browser": {
+        "check_embed": true,
+        "min_iframe_height": 400,
+        "min_frame_links": 3,
+        "frame_proof_string": "Motion Graphics Internship",
+        "max_broken_images": 0
+      },
+      "extra_urls": [
+        {
+          "url": "https://genesissciencenetwork.com/motiongraphics/internship",
+          "expected_status": 200,
+          "min_bytes": 800,
+          "measured_bytes": 1213,
+          "proof_string": "gsn-internship.vercel.app/landing/",
+          "note": "NON-CANONICAL ORPHAN, both live. A bare Elementor fragment - 1213 bytes is COMPLETE and correct, not truncated, so do not flag it on size. It has NO page title. Informational only: it never changes this target's state."
+        }
+      ],
+      "watch_out": "This page answers on TWO URLs and both work. /motiongraphics-internship/ is canonical (confirmed 2026-08-06). The short one is a titleless orphan to collapse - a cleanup item, not a fault. LIVE BUG 2026-08-07: images render standalone but NOT inside the embed (stations 19/25, internship 11/13). Cause: loading=\"lazy\" in a fixed-height cross-origin iframe that never scrolls, so the images never enter the frame viewport and are never requested. Budget stays 0 - this target is EXPECTED RED until the fix ships."
+    },
+    {
+      "id": "graphics-portal",
+      "label": "Graphics Portal",
+      "aka": [
+        "crew portal",
+        "graphics tracker app"
+      ],
+      "blurb": "The crew-only graphics app. Vercel-protected, so it should never answer an anonymous visitor.",
+      "order": 4,
+      "wordpress": null,
+      "vercel": {
+        "url": "https://graphics-portal.vercel.app",
+        "expected_status": 401,
+        "min_bytes": 500,
+        "measured_bytes": 2029,
+        "proof_string": null
+      },
+      "browser": {
+        "check_embed": false,
+        "expect_auth_wall": true
+      },
+      "watch_out": "401 IS THE HEALTHY STATE. No WordPress chain, so the check is \"is the app up and still refusing anonymous visitors\" - not \"did the embed break\". A 200 here is an ALARM: it would mean the protection came off a private tool."
+    },
+    {
+      "id": "gsn-home",
+      "label": "GSN Homepage",
+      "aka": [
+        "home",
+        "front door",
+        "genesissciencenetwork.com"
+      ],
+      "blurb": "The front door. Not a Vercel embed - a WordPress page with the live-stream player on it.",
+      "order": 5,
+      "wordpress": {
+        "url": "https://genesissciencenetwork.com/",
+        "expected_status": 200,
+        "min_bytes": 60000,
+        "measured_bytes": 101682,
+        "proof_string": "Watch Genesis Science Network LIVE",
+        "expected_iframe_src": "https://c.streamhoster.com/embed/media/WBs37L/i8xpej6sHAH/iloIo3soGqV_5"
+      },
+      "vercel": null,
+      "browser": {
+        "check_embed": true,
+        "min_iframe_height": 150,
+        "min_frame_links": 0,
+        "min_frame_controls": 5,
+        "frame_proof_string": "LIVE",
+        "max_broken_images": 0
+      },
+      "watch_out": "The iframe here is the StreamHoster LIVE PLAYER, not a Vercel build. If that src disappears or changes, the live stream is off the front page. The player renders no links, so it is floored on CONTROLS and an in-frame proof string instead of link count."
+    }
+  ],
+  "known_noise": {
+    "_why": "Measured on the live pages 2026-08-06. These are ALREADY broken or already noisy, today, with the pages working fine for visitors. If they counted as faults the board would be red on day one and Daniel would stop reading it inside a week - which is the main way monitoring projects die. Suppressed here, but ALWAYS counted and reported in the notes, so nothing is hidden. Remove an entry once it is genuinely fixed and it goes back to alarming. NOTE 2026-08-07: broken IMAGES are deliberately NOT in this list. The stations page is currently rendering 19 of 25 images blank inside the embed, and that is a real visitor-facing fault awaiting a fix - not noise to suppress.",
+    "request_substrings": [
+      {
+        "match": "genesissciencenetwork.com/css/styles.css",
+        "why": "Pre-existing site-wide 404. The WordPress theme links a relative css/styles.css that does not exist, so it 404s under every page path. Cosmetic - nothing on screen depends on it. Real bug, worth fixing separately."
+      },
+      {
+        "match": "/css/styles.css",
+        "why": "Same 404 as above, resolved against each page's own path (/stations/css/styles.css and so on)."
+      },
+      {
+        "match": "GSR-Guest-Portal/css/bootstrap-4.4.1.css",
+        "why": "Pre-existing 404 from an old guest-portal page's leftover stylesheet link. Cosmetic."
+      }
+    ],
+    "console_substrings": [
+      {
+        "match": "Blocked autofocusing on",
+        "why": "A browser policy notice, not a fault: Chrome and Safari refuse to let a cross-origin iframe steal focus. Correct behaviour, and it fires on every load."
+      },
+      {
+        "match": "Failed to load resource",
+        "why": "The console message for the 404s above. The message text carries no URL, so it cannot be attributed - the request-level check is the one that matters, and it is not suppressed."
+      }
+    ]
+  },
+  "browser_rules": {
+    "_why": "What flips a browser row red, and what only gets recorded. Structural failures (embed gone, collapsed, empty, pointing at the wrong build) are FAULTS - they mean a visitor sees a broken page. Console errors and third-party request failures are OBSERVATIONS - they are dominated by analytics and ad-blocking that we do not control, and anything that genuinely breaks the page already trips a structural check. Console counts still alarm if they jump past the baseline below.",
+    "first_party_only": true,
+    "max_console_errors": {
+      "_baseline_measured": "2026-08-06 on a Mac where google-analytics was being blocked locally, plus +3 headroom. CI runners will see different counts. RE-MEASURE from the first real CI run and edit these five numbers - it is a one-line change per target and nothing else depends on them.",
+      "stations": 6,
+      "episode-metadata": 6,
+      "internship": 6,
+      "graphics-portal": 3,
+      "gsn-home": 5
+    }
+  },
+  "link_check": {
+    "_why": "Only sweep hosts we own or embed. Third-party sites (YouTube, Facebook) routinely serve 403 to datacentre IPs, which would produce a permanent false alarm on a board whose whole value is that green means green.",
+    "allowed_hosts": [
+      "genesissciencenetwork.com",
+      "www.genesissciencenetwork.com",
+      "gsn-stations.vercel.app",
+      "gsn-episode-metadata.vercel.app",
+      "gsn-internship.vercel.app",
+      "davidrives.com",
+      "www.davidrives.com",
+      "davidrivesministries.org",
+      "www.davidrivesministries.org",
+      "creationsuperstore.com",
+      "www.creationsuperstore.com"
+    ],
+    "max_links_per_target": 40
+  },
+  "frame_headers": {
+    "_why": "Measured 2026-08-06: none of these headers exist on any of the six URLs, and there is no Cloudflare in front. That absence is WHY the embeds work. Direction matters and the original brief had it backwards - see README, 'The header check'.",
+    "vercel_must_not_send": [
+      "x-frame-options",
+      "content-security-policy:frame-ancestors"
+    ],
+    "wordpress_must_not_send": [
+      "content-security-policy:frame-src",
+      "content-security-policy:default-src"
+    ],
+    "wordpress_note_only": [
+      "x-frame-options",
+      "content-security-policy:frame-ancestors"
+    ]
+  },
+  "parser_notes": [
+    "iframe tags on these pages are MULTILINE. A single-line regex like `<iframe[^>]*src=\"` silently finds nothing on /stations/ and you will report a false break. Match with DOTALL, or just search for the expected src string directly.",
+    "Follow redirects, but record the FINAL status and the FINAL byte count.",
+    "genesissciencenetwork.com sets several rotating Set-Cookie values per request; ignore them, they are not a signal.",
+    "Use a 20s timeout. A timeout is fault_layer 'unknown', not 'broken'."
+  ]
+}

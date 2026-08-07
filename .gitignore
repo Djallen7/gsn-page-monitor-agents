@@ -1,0 +1,12 @@
+node_modules/
+.DS_Store
+.vercel
+# iCloud forks: the space-free name is canonical (GitHub folder discipline, 2026-08-03)
+* 2.*
+* 2/
+__pycache__/
+*.pyc
+# Working files, rewritten every run and never read across runs. Not committed:
+# fewer moving parts in a public repo, and less churn in the history.
+data/_http.json
+data/_browsers.json

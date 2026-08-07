@@ -1,0 +1,155 @@
+name: Page monitor
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  HOW OFTEN THIS RUNS  ←  this is the one-line edit
+#
+#  Right now it runs ONLY when you press the button (Actions tab → "Page
+#  monitor" → "Run workflow"). Nothing runs on its own.
+#
+#  To turn the hourly robot ON: delete the two "#" characters in front of
+#  `schedule:` and the `- cron:` line under it, then commit.
+#  To turn it OFF again: put the "#" back. That is the whole switch.
+#
+#  To change how often, edit the cron string:
+#     '0 * * * *'      every hour            ← start here, per the plan
+#     '0 */3 * * *'    every 3 hours         ← step down to this once it's proven
+#     '0 12 * * *'     once a day at 7am Central
+#  Times are UTC. Central time is UTC-5 in summer, UTC-6 in winter.
+#  GitHub's scheduler is best-effort and can be late by several minutes under load;
+#  that is normal and the dashboard's staleness rule allows for it (2 hours).
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  workflow_dispatch:
+    inputs:
+      include_safari:
+        description: "Also run the real-Safari pass on a Mac (slower, and only free while this repo is public)"
+        type: boolean
+        default: false
+
+  # schedule:
+  #   - cron: '0 * * * *'      # hourly  - Chromium + WebKit (free, Linux)
+  #   - cron: '20 12 * * *'    # daily   - adds the real-Safari pass on a Mac
+
+# Never let two runs write data/ at the same time - the second one would hit a
+# push conflict and the board would silently keep the older report.
+concurrency:
+  group: page-monitor
+  cancel-in-progress: false
+
+permissions:
+  contents: write        # the only permission this needs: committing its own reports
+
+jobs:
+  # ── the hourly lane: Chromium + WebKit on Linux ────────────────────────────
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install Playwright and its two browsers
+        run: |
+          npm ci --omit=dev
+          npx playwright install --with-deps chromium webkit
+
+      - name: Self-test the header logic before trusting its verdict
+        run: python3 test_headers.py
+
+      - name: Layer 1 and 2 - the WordPress page and the Vercel build behind it
+        run: python3 check.py --stage http
+
+      - name: Browsers - Chromium and WebKit, desktop and mobile
+        run: node browser_scan.mjs
+
+      - name: Roll it up into the dashboard's contract
+        run: python3 check.py --stage merge
+
+      - name: Commit the report
+        run: |
+          git config user.name  "gsn-page-monitor"
+          git config user.email "gsn-page-monitor@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "nothing changed"
+            exit 0
+          fi
+          git commit -m "monitor: $(python3 -c "import json;d=json.load(open('data/latest.json'));print(' '.join(f\"{k}={v['state']}\" for k,v in d['targets'].items()))")"
+          # Another run may have landed while this one was working. Rebase, don't force.
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Say the result out loud in the run summary
+        if: always()
+        run: |
+          if [ ! -f data/latest.json ]; then
+            echo "## Page monitor" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "The check did not get far enough to write a report. See the failing step above." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          {
+            echo "## Page monitor"
+            echo ""
+            python3 - <<'PY'
+          import json
+          d = json.load(open('data/latest.json'))
+          icon = {"clear":"🟢","degraded":"🟡","broken":"🔴","unknown":"⚪"}
+          print("| Page | State | Where it broke | Notes |")
+          print("|---|---|---|---|")
+          for k, v in d["targets"].items():
+              n = "; ".join(v["notes"][:2]).replace("|", "/")
+              print(f"| {k} | {icon.get(v['state'],'')} {v['state']} | {v['fault_layer']} | {n} |")
+          PY
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # ── the daily lane: REAL Safari on a Mac ───────────────────────────────────
+  #
+  #  Only free while this repo is PUBLIC. On a private repo a Mac runner costs
+  #  $0.062/minute, so if this repo is ever made private, turn this job off.
+  #
+  #  It runs only when you tick the "include_safari" box on a manual run, or on the
+  #  once-a-day '20 12 * * *' cron above (once you uncomment the schedule block).
+  #  It writes data/_safari.json; the NEXT hourly sweep folds those rows in. That
+  #  decoupling is deliberate - the two lanes never race each other for a git push.
+  #
+  #  UNPROVEN: nobody has yet confirmed `sudo safaridriver --enable` works on a
+  #  GitHub macOS runner for this repo. If it doesn't, the job still exits green and
+  #  writes "not run" rows, which the board shows as "not checked" - never as a pass.
+  safari:
+    if: inputs.include_safari || github.event.schedule == '20 12 * * *'
+    runs-on: macos-latest
+    timeout-minutes: 20
+    needs: sweep
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Turn on Safari's automation driver
+        run: sudo safaridriver --enable
+
+      - name: Real Safari, desktop and mobile widths
+        run: node safari_scan.mjs
+
+      - name: Commit the Safari pass
+        run: |
+          git config user.name  "gsn-page-monitor"
+          git config user.email "gsn-page-monitor@users.noreply.github.com"
+          git add data/_safari.json
+          if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi
+          git commit -m "monitor: daily real-Safari pass"
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

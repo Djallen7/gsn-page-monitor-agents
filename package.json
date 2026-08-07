@@ -1,0 +1,20 @@
+{
+  "name": "gsn-page-monitor-agents",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Hourly health checks for the published Genesis Science Network pages.",
+  "scripts": {
+    "check": "python3 check.py --stage http && node browser_scan.mjs && python3 check.py --stage merge",
+    "http": "python3 check.py --stage http",
+    "browsers": "node browser_scan.mjs",
+    "safari": "node safari_scan.mjs",
+    "merge": "python3 check.py --stage merge"
+  },
+  "dependencies": {
+    "playwright": "1.60.0"
+  },
+  "devDependencies": {
+    "selenium-webdriver": "^4.30.0"
+  }
+}

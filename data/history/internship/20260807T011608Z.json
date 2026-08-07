@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "target_id": "internship",
+  "checked_at": "2026-08-07T01:16:08Z",
+  "run_id": "20260807T011608Z",
+  "wordpress": {
+    "url": "https://genesissciencenetwork.com/motiongraphics-internship/",
+    "status": 200,
+    "bytes": 74206,
+    "proof_found": true,
+    "error": null,
+    "iframe_src_found": true,
+    "iframe_src": "https://gsn-internship.vercel.app/landing/",
+    "iframe_src_expected": true,
+    "frame_headers": null
+  },
+  "vercel": {
+    "url": "https://gsn-internship.vercel.app/landing/",
+    "status": 200,
+    "bytes": 101636,
+    "proof_found": true,
+    "error": null,
+    "frame_headers": null
+  },
+  "browsers": [
+    {
+      "browser": "chrome",
+      "viewport": "desktop",
+      "ok": false,
+      "console_errors": 3,
+      "failed_requests": 7,
+      "notes": "Chromium - 11 of 13 images did not render inside the embed (gsr.png, kids-corner.png, changing-the-narrative.png) - visitors see blank spaces"
+    },
+    {
+      "browser": "chrome",
+      "viewport": "mobile",
+      "ok": false,
+      "console_errors": 3,
+      "failed_requests": 8,
+      "notes": "Chromium - 11 of 13 images did not render inside the embed (gsr.png, kids-corner.png, changing-the-narrative.png) - visitors see blank spaces"
+    },
+    {
+      "browser": "safari",
+      "viewport": "desktop",
+      "ok": false,
+      "console_errors": 3,
+      "failed_requests": 4,
+      "notes": "Playwright WebKit (stand-in for Safari) - 11 of 13 images did not render inside the embed (gsr.png, kids-corner.png, changing-the-narrative.png) - visitors see blank spaces"
+    },
+    {
+      "browser": "safari",
+      "viewport": "mobile",
+      "ok": false,
+      "console_errors": 3,
+      "failed_requests": 4,
+      "notes": "Playwright WebKit (stand-in for Safari) - 11 of 13 images did not render inside the embed (gsr.png, kids-corner.png, changing-the-narrative.png) - visitors see blank spaces"
+    }
+  ],
+  "fault_layer": "browser",
+  "state": "broken",
+  "consecutive_failures": 2,
+  "fix_attempt": null,
+  "handoff_prompt": "The GSN page \"Motion Graphics Internship\" is failing its automated health check and I need help fixing it. I am not a developer - explain in plain English.\n\nWHAT IT IS: The internship recruiting landing page.\nCHECKED AT: 2026-08-07T01:16:08Z (UTC)\nWHERE THE ROBOT THINKS IT BROKE: browser\n\nTHE CHAIN, LAYER BY LAYER:\n  1. WordPress page https://genesissciencenetwork.com/motiongraphics-internship/\n     status 200, 74,206 bytes, proof string found\n     embed tag present; points at 'https://gsn-internship.vercel.app/landing/'; expected 'https://gsn-internship.vercel.app/landing/' -> match\n  2. Vercel build https://gsn-internship.vercel.app/landing/\n     status 200 (expected 200), 101,636 bytes, proof string found\n\nBROWSER FAILURES:\n  - chrome / desktop: Chromium - 11 of 13 images did not render inside the embed (gsr.png, kids-corner.png, changing-the-narrative.png) - visitors see blank spaces (3 console errors, 7 failed requests)\n  - chrome / mobile: Chromium - 11 of 13 images did not render inside the embed (gsr.png, kids-corner.png, changing-the-narrative.png) - visitors see blank spaces (3 console errors, 8 failed requests)\n  - safari / desktop: Playwright WebKit (stand-in for Safari) - 11 of 13 images did not render inside the embed (gsr.png, kids-corner.png, changing-the-narrative.png) - visitors see blank spaces (3 console errors, 4 failed requests)\n  - safari / mobile: Playwright WebKit (stand-in for Safari) - 11 of 13 images did not render inside the embed (gsr.png, kids-corner.png, changing-the-narrative.png) - visitors see blank spaces (3 console errors, 4 failed requests)\n\nALREADY RULED OUT BY THE ROBOT:\n  - It is anonymous, so this is NOT the logged-in-only WordPress fatal.\n  - Both layers were fetched separately, so you can trust the layer split above.\n  - Third-party links were deliberately not checked; they are not the cause.\n\nWHERE THE SOURCE LIVES (on Daniel's Mac):\n  - stations          -> ~/Desktop/gsn-stations-deploy  (NOT a git repo)\n  - episode-metadata  -> ~/Documents/GitHub/production-portal/gsr-broll-sourcing/metadata-portal/vercel-deploy\n  - internship        -> ~/Documents/GitHub/GSR-Internship-Program/landing\n  - graphics-portal   -> ~/Documents/GitHub/production-portal/gsr-broll-sourcing/graphics-portal\n  - gsn-home          -> WordPress on genesissciencenetwork.com, no repo\n\nWHAT I WANT: tell me which layer to fix and the smallest safe change that fixes it. If the fix is on WordPress or a plugin, say so plainly and stop - do not edit anything. If it is a Vercel build, show me the change and the exact deploy command, and I will run it myself.",
+  "screenshot_url": null,
+  "notes": [
+    "Frame-blocking headers still absent on both layers (this is what keeps the embed alive).",
+    "Live embed points at https://gsn-internship.vercel.app/landing/",
+    "Also answers on https://genesissciencenetwork.com/motiongraphics/internship - working (200, 1,213 bytes).",
+    "Links: 3 checked on our own hosts, 0 broken, 0 skipped (third-party or over the 40 cap).",
+    "Safari rows are Playwright WebKit (a stand-in). The daily real-Safari pass has never run - see README."
+  ]
+}
