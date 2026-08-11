@@ -248,6 +248,98 @@ async function scanOne(page, spec, viewportName) {
         }
       }
     }
+  } else if (bcfg.check_page_content) {
+    // --- the same assertions, but at PAGE level ---------------------------------
+    //
+    // Added 2026-08-07, when the four old WordPress URLs were pointed at the new
+    // subdomains. Those subdomains serve the builds DIRECTLY - there is no iframe
+    // left to reach into - so every content assertion above became unreachable for
+    // them. Turning check_embed off on its own would have left these three targets
+    // passing on status code alone: green, and blind to exactly the blank-page and
+    // blank-image faults this monitor was built to catch. These re-assert the same
+    // three things (is it populated, did the images render, is its own text there)
+    // against the page instead of against a frame.
+    const pageLinks = await page.$$eval('a[href]', (as) => as.map((a) => a.href)).catch(() => []);
+    pageLinks.forEach((h) => links.add(h));
+    const minLinks = bcfg.min_page_links ?? 0;
+    if (pageLinks.length < minLinks) {
+      problems.push(`only ${pageLinks.length} links on the page, expected at least ${minLinks} - the build loaded but rendered nothing useful`);
+    }
+
+    const imgs = await page
+      .evaluate(() => {
+        const all = [...document.images];
+        const bad = all.filter((i) => !i.complete || i.naturalWidth === 0);
+        return { total: all.length, broken: bad.length, first: bad.slice(0, 3).map((i) => (i.getAttribute('src') || '').split('/').pop()) };
+      })
+      .catch(() => null);
+    const maxBroken = bcfg.max_broken_images ?? 0;
+    if (imgs && imgs.broken > maxBroken) {
+      problems.push(`${imgs.broken} of ${imgs.total} images did not render (${imgs.first.join(', ')}) - visitors see blank spaces`);
+    }
+
+    if (bcfg.page_proof_string) {
+      const text = await page.evaluate(() => (document.body ? document.body.textContent : '')).catch(() => '');
+      if (!text.includes(bcfg.page_proof_string)) {
+        problems.push(`"${bcfg.page_proof_string}" is missing from the page - it loaded but the content is not there`);
+      }
+    }
+
+    // The legacy WordPress URL must still show the "here is the current link" card,
+    // pointing at this subdomain. Checked in a real browser because the card is drawn
+    // client-side: an HTTP fetch of the old URL returns the old wrapper and proves
+    // nothing.
+    //
+    // ASSERTING IT IS ON SCREEN, NOT MERELY IN THE DOM, IS THE WHOLE POINT. These
+    // wrappers give the iframe a FIXED height unrelated to the visitor's window:
+    // /stations/ measured 6000px tall on 2026-08-07 while a visitor sees ~900px of it
+    // and it does not scroll. A centred card rendered perfectly at 2776px and was
+    // invisible to every human, while every DOM-presence check passed. So the check
+    // is the button's position in the PARENT page's coordinates against a nominal
+    // window height.
+    if (bcfg.legacy_url) {
+      const lp = await page.context().newPage();
+      try {
+        await lp.goto(bcfg.legacy_url, { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+        await lp.waitForTimeout(SETTLE_MS);
+        const expectUrl = (spec.vercel || spec.wordpress).url;
+        const frameTop = await lp
+          .evaluate(() => { const f = document.querySelector('iframe'); return f ? Math.round(f.getBoundingClientRect().top) : null; })
+          .catch(() => null);
+        let card = null;
+        for (const fr of lp.frames()) {
+          if (fr === lp.mainFrame()) continue;
+          const r = await fr.evaluate(() => {
+            const h = document.getElementById('gsn-moved-notice');
+            if (!h || !h.shadowRoot) return null;
+            const a = h.shadowRoot.querySelector('a.cta');
+            if (!a) return null;
+            const b = a.getBoundingClientRect();
+            return { href: a.getAttribute('href'), w: Math.round(b.width), h: Math.round(b.height), bottom: Math.round(b.bottom) };
+          }).catch(() => null);
+          if (r) { card = r; break; }
+        }
+        if (!card) {
+          problems.push(`legacy link ${bcfg.legacy_url}: the "current link" card is not there - visitors hit a dead end`);
+        } else {
+          if (card.href !== expectUrl) {
+            problems.push(`legacy link card points at ${card.href}, expected ${expectUrl}`);
+          }
+          if (card.w < 80 || card.h < 20) {
+            problems.push(`legacy link card button rendered ${card.w}x${card.h} - collapsed`);
+          }
+          const absBottom = (frameTop ?? 0) + card.bottom;
+          const fold = bcfg.legacy_fold_px ?? 760;
+          if (absBottom > fold) {
+            problems.push(`legacy link card button sits ${absBottom}px down the page, past the ${fold}px fold - rendered but invisible to visitors`);
+          }
+        }
+      } catch (e) {
+        problems.push(`legacy link ${bcfg.legacy_url} failed to load: ${e.message.split('\n')[0]}`);
+      } finally {
+        await lp.close().catch(() => {});
+      }
+    }
   }
 
   // --- observations that DO alarm ---------------------------------------------

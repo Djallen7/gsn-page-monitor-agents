@@ -523,6 +523,12 @@ def prune_history(days=7):
     root = os.path.join(DATA, "history")
     for tid in os.listdir(root) if os.path.isdir(root) else []:
         d = os.path.join(root, tid)
+        # Skip anything that is not a per-target directory. macOS drops .DS_Store in
+        # here the moment the folder is opened in Finder, and listdir() on it raised
+        # NotADirectoryError and took the whole run down (seen 2026-08-08). An
+        # unattended monitor must not be killable by a Finder window.
+        if not os.path.isdir(d):
+            continue
         for fn in os.listdir(d):
             if not fn.endswith(".json"):
                 continue

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "measured_on": "2026-08-06",
+  "measured_on": "2026-08-07",
   "_readme": "The registry of what is monitored. Agents read this; they never hardcode URLs. Every byte count and status here was MEASURED on 2026-08-06, not assumed. The contract this feeds is portal-hub/page-monitor/CONTRACT.md.",
   "_provenance": "Copied from production-portal/portal-hub/page-monitor/targets.json (private repo) on 2026-08-06 so the public monitoring repo is self-contained. THIS copy is the one the hourly robot reads. The portal-hub copy is what the dashboard reads for labels and blurbs. If you change a URL, change it in BOTH or the board will describe a page the robot isn't checking. Business/commercial commentary was stripped when this copy was made: this repo is public, and operational context about who was emailed what belongs in the private portal-hub copy, not here.",
   "targets": [
@@ -15,29 +15,36 @@
       ],
       "blurb": "The station-partner page. Outward-facing and already circulated, so a regression here is seen by the audience it exists to convert.",
       "order": 1,
-      "wordpress": {
-        "url": "https://genesissciencenetwork.com/stations/",
-        "expected_status": 200,
-        "min_bytes": 50000,
-        "measured_bytes": 72158,
-        "proof_string": "gsn-stations.vercel.app",
-        "expected_iframe_src": "https://gsn-stations.vercel.app"
-      },
+      "wordpress": null,
       "vercel": {
-        "url": "https://gsn-stations.vercel.app",
+        "url": "https://stations.genesissciencenetwork.com/",
         "expected_status": 200,
         "min_bytes": 150000,
-        "measured_bytes": 249242,
+        "measured_bytes": 252657,
         "proof_string": "Put Genesis Science Network on your station."
       },
       "browser": {
-        "check_embed": true,
-        "min_iframe_height": 400,
-        "min_frame_links": 3,
-        "frame_proof_string": "Put Genesis Science Network on your station.",
-        "max_broken_images": 0
+        "check_embed": false,
+        "check_page_content": true,
+        "min_page_links": 3,
+        "page_proof_string": "Put Genesis Science Network on your station.",
+        "max_broken_images": 0,
+        "legacy_url": "https://genesissciencenetwork.com/stations/",
+        "legacy_fold_px": 760
       },
-      "watch_out": "A SECOND Vercel project exists - gsn-stations-redesign - which is a SANDBOX. The live WordPress page points at gsn-stations, NOT the redesign. Every report records which build is actually live so a stale sandbox is never mistaken for production. LIVE BUG 2026-08-07: images render standalone but NOT inside the embed (stations 19/25, internship 11/13). Cause: loading=\"lazy\" in a fixed-height cross-origin iframe that never scrolls, so the images never enter the frame viewport and are never requested. Budget stays 0 - this target is EXPECTED RED until the fix ships."
+      "watch_out": "MIGRATED 2026-08-07: this page now lives at its own subdomain and the build is served DIRECTLY there - no WordPress wrapper, no iframe. The old URL(s) still answer 200 and still carry the old wrapper markup, but a real browser is handed off to the subdomain by a snippet inside the build (it fires only when the build finds itself framed). That is why the browser lane checks the SUBDOMAIN and re-checks each legacy URL via browser.legacy_url: an HTTP fetch of the old URL still returns the old wrapper and would prove nothing. check_embed is off because there is no embed left; the content assertions moved to check_page_content, so this target is still asserted on rendered links, rendered images and its own proof string - not on status code alone. PRIOR NOTE, kept for history: A SECOND Vercel project exists - gsn-stations-redesign - which is a SANDBOX. The live WordPress page points at gsn-stations, NOT the redesign. Every report records which build is actually live so a stale sandbox is never mistaken for production. LIVE BUG 2026-08-07: images render standalone but NOT inside the embed (stations 19/25, internship 11/13). Cause: loading=\"lazy\" in a fixed-height cross-origin iframe that never scrolls, so the images never enter the frame viewport and are never requested. Budget stays 0 - this target is EXPECTED RED until the fix ships.",
+      "extra_urls": [
+        {
+          "url": "https://genesissciencenetwork.com/stations/",
+          "expected_status": 200,
+          "min_bytes": 800,
+          "measured_bytes": null,
+          "proof_string": null,
+          "note": "LEGACY URL, superseded 2026-08-07 by https://stations.genesissciencenetwork.com/. Still live and still held by people, so it is still checked: it must keep answering 200. It no longer needs to contain an iframe or any proof string - the hand-off to the subdomain is asserted in the browser lane instead. Informational: it never changes this target's state."
+        }
+      ],
+      "canonical_note": "CANONICAL ADDRESS AS OF 2026-08-07: https://stations.genesissciencenetwork.com/. Old address(es), still live: https://genesissciencenetwork.com/stations/",
+      "_superseded_wordpress": "https://genesissciencenetwork.com/stations/"
     },
     {
       "id": "episode-metadata",
@@ -49,29 +56,37 @@
       ],
       "blurb": "The partner-facing episode metadata portal - where distribution partners read episode titles, descriptions and tags.",
       "order": 2,
-      "wordpress": {
-        "url": "https://genesissciencenetwork.com/episode-metadata/",
-        "expected_status": 200,
-        "min_bytes": 50000,
-        "measured_bytes": 71966,
-        "proof_string": "gsn-episode-metadata.vercel.app",
-        "expected_iframe_src": "https://gsn-episode-metadata.vercel.app"
-      },
+      "wordpress": null,
       "vercel": {
-        "url": "https://gsn-episode-metadata.vercel.app",
+        "url": "https://metadata.genesissciencenetwork.com/",
         "expected_status": 200,
         "min_bytes": 800000,
-        "measured_bytes": 1721603,
-        "proof_string": "GSN Episode Metadata Portal"
+        "measured_bytes": 1695939,
+        "proof_string": "Episode Metadata"
       },
       "browser": {
-        "check_embed": true,
-        "min_iframe_height": 400,
-        "min_frame_links": 50,
-        "frame_proof_string": "Episode Metadata",
-        "max_broken_images": 70
+        "check_embed": false,
+        "check_page_content": true,
+        "min_page_links": 50,
+        "page_proof_string": "Episode Metadata",
+        "max_broken_images": 70,
+        "legacy_url": "https://genesissciencenetwork.com/episode-metadata/",
+        "legacy_fold_px": 760,
+        "_builder_note": "The card for this page lives in metadata-portal/handoff/build_html.py (constant MOVED_NOTICE, substituted AFTER gsr_skin.apply so it cannot collide with a skin anchor), NOT in the generated file. A rebuild on 2026-08-07 22:35 wiped an earlier copy that had been injected into the output; putting it in the builder is what makes it survive the next rebuild."
       },
-      "watch_out": "This wrapper is the flaky one: on 2026-08-06 it twice rendered a WordPress error while its Vercel build served 200 throughout, and refetched clean both times. That is why one bad sample is Degraded, not Broken. NOTE: that fault fires only on a LOGGED-IN render. This robot is always anonymous, so it cannot see it. See README, \"What this cannot see\". IMAGE BUDGET: 60 of 120 YouTube thumbnails do not render - but the count is IDENTICAL standalone and embedded (measured 2026-08-07), so it is a property of the build, NOT the embed bug that hit stations and internship. Budget set to 70 so it does not mask a real regression; the 60 are tracked as their own item."
+      "watch_out": "MIGRATED 2026-08-07: this page now lives at its own subdomain and the build is served DIRECTLY there - no WordPress wrapper, no iframe. The old URL(s) still answer 200 and still carry the old wrapper markup, but a real browser is handed off to the subdomain by a snippet inside the build (it fires only when the build finds itself framed). That is why the browser lane checks the SUBDOMAIN and re-checks each legacy URL via browser.legacy_url: an HTTP fetch of the old URL still returns the old wrapper and would prove nothing. check_embed is off because there is no embed left; the content assertions moved to check_page_content, so this target is still asserted on rendered links, rendered images and its own proof string - not on status code alone. PRIOR NOTE, kept for history: This wrapper is the flaky one: on 2026-08-06 it twice rendered a WordPress error while its Vercel build served 200 throughout, and refetched clean both times. That is why one bad sample is Degraded, not Broken. NOTE: that fault fires only on a LOGGED-IN render. This robot is always anonymous, so it cannot see it. See README, \"What this cannot see\". IMAGE BUDGET: 60 of 120 YouTube thumbnails do not render - but the count is IDENTICAL standalone and embedded (measured 2026-08-07), so it is a property of the build, NOT the embed bug that hit stations and internship. Budget set to 70 so it does not mask a real regression; the 60 are tracked as their own item.",
+      "extra_urls": [
+        {
+          "url": "https://genesissciencenetwork.com/episode-metadata/",
+          "expected_status": 200,
+          "min_bytes": 800,
+          "measured_bytes": null,
+          "proof_string": null,
+          "note": "LEGACY URL, superseded 2026-08-07 by https://metadata.genesissciencenetwork.com/. Still live and still held by people, so it is still checked: it must keep answering 200. It no longer needs to contain an iframe or any proof string - the hand-off to the subdomain is asserted in the browser lane instead. Informational: it never changes this target's state."
+        }
+      ],
+      "canonical_note": "CANONICAL ADDRESS AS OF 2026-08-07: https://metadata.genesissciencenetwork.com/. Old address(es), still live: https://genesissciencenetwork.com/episode-metadata/",
+      "_superseded_wordpress": "https://genesissciencenetwork.com/episode-metadata/"
     },
     {
       "id": "internship",
@@ -83,40 +98,44 @@
       ],
       "blurb": "The internship recruiting landing page.",
       "order": 3,
-      "canonical_note": "Daniel confirmed 2026-08-06: /motiongraphics-internship/ is CANONICAL. The short /motiongraphics/internship URL is a live orphan, still checked below as an extra URL, still flagged for collapsing.",
-      "wordpress": {
-        "url": "https://genesissciencenetwork.com/motiongraphics-internship/",
-        "expected_status": 200,
-        "min_bytes": 50000,
-        "measured_bytes": 74206,
-        "proof_string": "gsn-internship.vercel.app/landing/",
-        "expected_iframe_src": "https://gsn-internship.vercel.app/landing/"
-      },
+      "canonical_note": "CANONICAL ADDRESS AS OF 2026-08-07: https://motiongraphics.genesissciencenetwork.com/. Old address(es), still live: https://genesissciencenetwork.com/motiongraphics-internship/, https://genesissciencenetwork.com/motiongraphics/internship",
+      "wordpress": null,
       "vercel": {
-        "url": "https://gsn-internship.vercel.app/landing/",
+        "url": "https://motiongraphics.genesissciencenetwork.com/",
         "expected_status": 200,
         "min_bytes": 60000,
-        "measured_bytes": 101636,
+        "measured_bytes": 104412,
         "proof_string": "Motion Graphics Internship"
       },
       "browser": {
-        "check_embed": true,
-        "min_iframe_height": 400,
-        "min_frame_links": 3,
-        "frame_proof_string": "Motion Graphics Internship",
-        "max_broken_images": 0
+        "check_embed": false,
+        "check_page_content": true,
+        "min_page_links": 3,
+        "page_proof_string": "Motion Graphics Internship",
+        "max_broken_images": 0,
+        "legacy_url": "https://genesissciencenetwork.com/motiongraphics-internship/",
+        "legacy_fold_px": 760
       },
       "extra_urls": [
+        {
+          "url": "https://genesissciencenetwork.com/motiongraphics-internship/",
+          "expected_status": 200,
+          "min_bytes": 800,
+          "measured_bytes": null,
+          "proof_string": null,
+          "note": "LEGACY URL, superseded 2026-08-07 by https://motiongraphics.genesissciencenetwork.com/. Still live and still held by people, so it is still checked: it must keep answering 200. It no longer needs to contain an iframe or any proof string - the hand-off to the subdomain is asserted in the browser lane instead. Informational: it never changes this target's state."
+        },
         {
           "url": "https://genesissciencenetwork.com/motiongraphics/internship",
           "expected_status": 200,
           "min_bytes": 800,
-          "measured_bytes": 1213,
-          "proof_string": "gsn-internship.vercel.app/landing/",
-          "note": "NON-CANONICAL ORPHAN, both live. A bare Elementor fragment - 1213 bytes is COMPLETE and correct, not truncated, so do not flag it on size. It has NO page title. Informational only: it never changes this target's state."
+          "measured_bytes": null,
+          "proof_string": null,
+          "note": "LEGACY URL, superseded 2026-08-07 by https://motiongraphics.genesissciencenetwork.com/. Still live and still held by people, so it is still checked: it must keep answering 200. It no longer needs to contain an iframe or any proof string - the hand-off to the subdomain is asserted in the browser lane instead. Informational: it never changes this target's state."
         }
       ],
-      "watch_out": "This page answers on TWO URLs and both work. /motiongraphics-internship/ is canonical (confirmed 2026-08-06). The short one is a titleless orphan to collapse - a cleanup item, not a fault. LIVE BUG 2026-08-07: images render standalone but NOT inside the embed (stations 19/25, internship 11/13). Cause: loading=\"lazy\" in a fixed-height cross-origin iframe that never scrolls, so the images never enter the frame viewport and are never requested. Budget stays 0 - this target is EXPECTED RED until the fix ships."
+      "watch_out": "MIGRATED 2026-08-07: this page now lives at its own subdomain and the build is served DIRECTLY there - no WordPress wrapper, no iframe. The old URL(s) still answer 200 and still carry the old wrapper markup, but a real browser is handed off to the subdomain by a snippet inside the build (it fires only when the build finds itself framed). That is why the browser lane checks the SUBDOMAIN and re-checks each legacy URL via browser.legacy_url: an HTTP fetch of the old URL still returns the old wrapper and would prove nothing. check_embed is off because there is no embed left; the content assertions moved to check_page_content, so this target is still asserted on rendered links, rendered images and its own proof string - not on status code alone. PRIOR NOTE, kept for history: This page answers on TWO URLs and both work. /motiongraphics-internship/ is canonical (confirmed 2026-08-06). The short one is a titleless orphan to collapse - a cleanup item, not a fault. LIVE BUG 2026-08-07: images render standalone but NOT inside the embed (stations 19/25, internship 11/13). Cause: loading=\"lazy\" in a fixed-height cross-origin iframe that never scrolls, so the images never enter the frame viewport and are never requested. Budget stays 0 - this target is EXPECTED RED until the fix ships.",
+      "_superseded_wordpress": "https://genesissciencenetwork.com/motiongraphics-internship/"
     },
     {
       "id": "graphics-portal",
@@ -223,7 +242,10 @@
       "davidrivesministries.org",
       "www.davidrivesministries.org",
       "creationsuperstore.com",
-      "www.creationsuperstore.com"
+      "www.creationsuperstore.com",
+      "stations.genesissciencenetwork.com",
+      "metadata.genesissciencenetwork.com",
+      "motiongraphics.genesissciencenetwork.com"
     ],
     "max_links_per_target": 40
   },
@@ -247,5 +269,6 @@
     "Follow redirects, but record the FINAL status and the FINAL byte count.",
     "genesissciencenetwork.com sets several rotating Set-Cookie values per request; ignore them, they are not a signal.",
     "Use a 20s timeout. A timeout is fault_layer 'unknown', not 'broken'."
-  ]
+  ],
+  "_migration_2026_08_07": "MIGRATED 2026-08-07: this page now lives at its own subdomain and the build is served DIRECTLY there - no WordPress wrapper, no iframe. The old URL(s) still answer 200 and still carry the old wrapper markup, but a real browser is handed off to the subdomain by a snippet inside the build (it fires only when the build finds itself framed). That is why the browser lane checks the SUBDOMAIN and re-checks each legacy URL via browser.legacy_url: an HTTP fetch of the old URL still returns the old wrapper and would prove nothing. check_embed is off because there is no embed left; the content assertions moved to check_page_content, so this target is still asserted on rendered links, rendered images and its own proof string - not on status code alone."
 }

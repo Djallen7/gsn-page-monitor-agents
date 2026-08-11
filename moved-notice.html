@@ -1,0 +1,159 @@
+<!-- GSN-MOVED-NOTICE -->
+<script>
+(function () {
+  var NEW_URL   = '__NEW_URL__';
+  var PAGE_NAME = '__PAGE_NAME__';
+  var KICKER    = '__KICKER__';
+  var LOGO  = 'https://stations.genesissciencenetwork.com/assets/gsn-logo-official-2021.png';
+  var VIDEO = 'https://motiongraphics.genesissciencenetwork.com/assets/cosmic-loop.mp4';
+  var STILL = 'https://stations.genesissciencenetwork.com/assets/reel-1-campus-rainbow.webp';
+
+  // Already at the destination: do nothing.
+  try { if (location.hostname === NEW_URL.split('/')[2]) return; } catch (e) {}
+
+  // Not framed means served top-level, so this is the real page. Do nothing.
+  var framed = true;
+  try { framed = (window.self !== window.top); } catch (e) { framed = true; }
+  if (!framed) return;
+
+  var CSS = [
+    ':host{all:initial;display:block}',
+    '*{box-sizing:border-box;margin:0;padding:0}',
+    // TOP-ANCHORED, NOT CENTERED, AND THIS IS LOAD-BEARING. The old WordPress pages
+    // give this iframe a FIXED height that is nothing like the visitor's window:
+    // measured 2026-08-07, /stations/ is 6000px tall while the visitor sees ~900px of
+    // it and it does not scroll. Centering put the card at 2776px, i.e. perfectly
+    // rendered and completely invisible. Anchor to the top so the card lands in the
+    // band the visitor can actually see, on a 900px box and a 6000px one alike.
+    '.wrap{position:fixed;inset:0;z-index:2147483647;overflow:auto;background:#02111a;',
+      'display:flex;align-items:flex-start;justify-content:center;padding:64px 20px 48px;',
+      "font-family:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;",
+      '-webkit-font-smoothing:antialiased}',
+    // Art capped to the visible band for the same reason: stretching it over 6000px
+    // would smear it. Below the cap the wrap's flat navy carries on, and the veil
+    // already resolves to that exact navy, so the seam is invisible.
+    '.bg{position:absolute;top:0;left:0;width:100%;height:1200px;object-fit:cover;opacity:.46;',
+      'border:0;pointer-events:none}',
+    // Safari refuses to autoplay this inside a cross-origin frame and puts its own
+    // start-playback button in the middle of the card. The art is decorative, so the
+    // control is suppressed rather than the video dropped: it still plays everywhere
+    // that allows it, and degrades to a still frame where it does not.
+    '.bg::-webkit-media-controls{display:none!important}',
+    '.bg::-webkit-media-controls-start-playback-button{display:none!important}',
+    '.bg::-webkit-media-controls-panel{display:none!important}',
+    '.bg::-webkit-media-controls-overlay-play-button{display:none!important}',
+    '.veil{position:absolute;top:0;left:0;right:0;height:1200px;',
+      'background:radial-gradient(125% 80% at 50% 32%,',
+      'rgba(2,17,26,.30) 0%,rgba(2,17,26,.80) 55%,#02111a 88%)}',
+    '.card{position:relative;width:100%;max-width:560px;text-align:center;',
+      'background:rgba(6,36,53,.66);border:1px solid rgba(255,255,255,.08);border-radius:14px;',
+      'padding:44px 34px;backdrop-filter:blur(16px) saturate(125%);',
+      '-webkit-backdrop-filter:blur(16px) saturate(125%);box-shadow:0 28px 64px rgba(0,0,0,.5)}',
+    '.logo{height:56px;width:auto;display:block;margin:0 auto 24px;',
+      'filter:brightness(0) invert(1);opacity:.94}',
+    '.kicker{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#1fa9e0;',
+      'font-weight:600;margin-bottom:14px}',
+    'h1{font-family:Archivo,system-ui,sans-serif;font-weight:700;font-size:32px;line-height:1.12;',
+      'letter-spacing:-.01em;color:#fff;margin-bottom:14px}',
+    '.lead{font-size:16px;line-height:1.6;color:rgba(255,255,255,.72);margin-bottom:30px}',
+    '.cta{display:inline-block;background:#fdc229;color:#02111a;text-decoration:none;',
+      'font-weight:700;font-size:16px;padding:15px 32px;border-radius:10px;transition:filter .15s}',
+    '.cta:hover{filter:brightness(1.07)}',
+    '.cta:focus-visible{outline:3px solid #1fa9e0;outline-offset:3px}',
+    '.rule{height:1px;background:rgba(255,255,255,.08);margin:30px 0 18px}',
+    '.url{font-size:13px;line-height:1.5;color:rgba(255,255,255,.45);word-break:break-all}',
+    '@media (max-width:430px){.wrap{padding:36px 16px 40px}h1{font-size:25px}',
+      '.card{padding:34px 22px}.logo{height:44px}.cta{display:block;padding:15px 20px}}',
+    '@media (prefers-reduced-motion:reduce){.bg{display:none}}'
+  ].join('');
+
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+
+  var HTML =
+    '<div class="wrap">' +
+      '<video class="bg" autoplay muted loop playsinline aria-hidden="true"><source src="' + esc(VIDEO) + '" type="video/mp4"></video>' +
+      '<div class="veil"></div>' +
+      '<div class="card" role="document">' +
+        '<img class="logo" src="' + esc(LOGO) + '" alt="Genesis Science Network">' +
+        '<p class="kicker">' + esc(KICKER) + '</p>' +
+        '<h1>Here’s the current link.</h1>' +
+        '<p class="lead">Bookmark this address for ' + esc(PAGE_NAME) + '. ' +
+          'It’s the one we’ll use going forward.</p>' +
+        '<a class="cta" href="' + esc(NEW_URL) + '" target="_top" rel="noopener">Open the page</a>' +
+        '<div class="rule"></div>' +
+        '<p class="url">' + esc(NEW_URL) + '</p>' +
+      '</div>' +
+    '</div>';
+
+  function mount() {
+    if (document.getElementById('gsn-moved-notice')) return;
+    var host = document.createElement('div');
+    host.id = 'gsn-moved-notice';
+    // Forced inline, and this is not belt-and-braces. A shadow root protects the card's
+    // INSIDES from the host page, but the host ELEMENT is still an ordinary div the page
+    // can style, and an outside rule beats the :host rule every time. The metadata portal
+    // carries `body.locked > *:not(.gate){display:none}` for its access-code screen, which
+    // hid the entire card while leaving it perfectly present in the DOM. An inline
+    // !important declaration is the one thing an author stylesheet cannot outrank.
+    host.style.setProperty('display', 'block', 'important');
+    host.style.setProperty('visibility', 'visible', 'important');
+    host.style.setProperty('opacity', '1', 'important');
+    // Shadow DOM so none of the three very different host pages can style this,
+    // and nothing here can leak back out into them.
+    var root;
+    try {
+      root = host.attachShadow({ mode: 'open' });
+      var st = document.createElement('style');
+      st.textContent = CSS;
+      root.appendChild(st);
+      var box = document.createElement('div');
+      box.innerHTML = HTML;
+      root.appendChild(box);
+    } catch (e) {
+      host.setAttribute('style', 'position:fixed;inset:0;z-index:2147483647;background:#02111a;color:#fff;' +
+        'display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;' +
+        "font-family:system-ui,-apple-system,'Segoe UI',sans-serif");
+      host.innerHTML = '<div><h1 style="font-size:28px;margin:0 0 14px">Here’s the current link.</h1>' +
+        '<p style="margin:0 0 24px;color:rgba(255,255,255,.72)">Bookmark this address for ' + esc(PAGE_NAME) + '.</p>' +
+        '<a href="' + esc(NEW_URL) + '" target="_top" rel="noopener" style="display:inline-block;background:#fdc229;' +
+        'color:#02111a;text-decoration:none;font-weight:700;padding:15px 30px;border-radius:10px">Open the page</a></div>';
+    }
+    (document.body || document.documentElement).appendChild(host);
+
+    // Safari will not autoplay this inside a cross-origin frame and draws its own
+    // start-playback button over the art, which reads as a broken video on a page
+    // partners see. The CSS control-suppression pseudo-elements do not reach it from
+    // inside a shadow root (verified in real Safari 26.4), so instead: give it a
+    // moment, and if it is genuinely not playing, drop the video and put a still in
+    // its place. Video where video works, a photograph where it does not, a stray
+    // play button nowhere.
+    try {
+      var v = root && root.querySelector ? root.querySelector('video.bg') : null;
+      if (v) {
+        setTimeout(function () {
+          if (v.paused || v.readyState < 2) {
+            var still = document.createElement('div');
+            still.setAttribute('style',
+              'position:absolute;top:0;left:0;right:0;height:1200px;pointer-events:none;opacity:.46;' +
+              'background:url(' + STILL + ') center 40% / cover no-repeat');
+            if (v.parentNode) v.parentNode.replaceChild(still, v);
+          }
+        }, 1200);
+      }
+    } catch (e) {}
+
+    // Lock the page behind it and stop any host media still playing out of sight.
+    try {
+      document.documentElement.style.overflow = 'hidden';
+      if (document.body) document.body.style.overflow = 'hidden';
+    } catch (e) {}
+    try {
+      var m = document.querySelectorAll('video,audio');
+      for (var i = 0; i < m.length; i++) { try { m[i].pause(); } catch (e) {} }
+    } catch (e) {}
+  }
+
+  if (document.body) mount();
+  else document.addEventListener('DOMContentLoaded', mount);
+})();
+</script>
